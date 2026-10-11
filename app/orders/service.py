@@ -31,7 +31,7 @@ def accept_order(db: Session, courier_id: int, order_id: int) -> Order:
     order = orders_repository.get_order_by_id(db, order_id)
     if not order:
         raise HTTPException(
-            statsu_code=404, 
+            status_code=404, 
             detail='Order with this id not found'
         )
     
