@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
 def create_user(db: Session, login, email, password) -> User:
-    if not auth_repository.get_user_by_login(db, login):
+    if auth_repository.get_user_by_login(db, login):
         raise HTTPException(
             status_code=400,
             detail=f'User with login {login} already exists'

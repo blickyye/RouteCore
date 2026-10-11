@@ -1,5 +1,6 @@
 from app.database.database import Base
 from app.enums.order_status_enum import OrderStatus
+from app.enums.user_role_enum import UserRole
 
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import ForeignKey
