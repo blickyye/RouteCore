@@ -28,8 +28,8 @@ class Order(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
-    courier_id: Mapped[int | None] = mapped_column(default=None)
+    courier_id: Mapped[int | None] = mapped_column(ForeignKey('courier.id'), default=None)
     pickup_address: Mapped[str]
     delivery_address: Mapped[str]
-    description: Mapped[str]
+    description: Mapped[str | None] = mapped_column(default=None)
     status: Mapped[OrderStatus] = mapped_column(default=OrderStatus.PENDING)

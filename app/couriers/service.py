@@ -13,5 +13,7 @@ def create_courier(db: Session, user_id) -> Courier:
         )
 
     courier = couriers_repository.create_courier(db, user_id)
+    db.commit()
+    db.refresh(courier)
 
     return courier

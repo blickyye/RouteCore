@@ -13,5 +13,5 @@ def create_courier(db: Session, user_id) -> Courier:
     return courier
 
 def get_courier_by_user_id(db: Session, user_id) -> Courier | None:
-    return db.query(Courier).filter(Courier.user_id==user_id).scalar()
+    return db.query(Courier).filter(Courier.user_id==user_id).first()
 
