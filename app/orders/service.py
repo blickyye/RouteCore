@@ -19,11 +19,6 @@ def show_my_orders(db: Session, user_id: int) -> list[Order]:
 
 def show_available_orders(db: Session) -> list[Order]:
     orders = orders_repository.show_available_orders(db)
-    if not orders:
-        raise HTTPException(
-            status_code=404,
-            detail='Orders not found'
-        )
 
     return orders
 
@@ -43,7 +38,7 @@ def accept_order(db: Session, courier_id: int, order_id: int) -> Order:
 
     accepted_order = orders_repository.accept_order(db, courier_id, order)
     db.commit()
-    db.refresh(order)
+    db.refresh(accepted_order)
 
     return accepted_order
 

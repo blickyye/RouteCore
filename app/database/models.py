@@ -13,6 +13,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     login: Mapped[str] = mapped_column(unique=True)
     email: Mapped[str] = mapped_column(unique=True)
+    role: Mapped[UserRole] = mapped_column(default=UserRole.CLIENT)
     hashed_password: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now())
 
