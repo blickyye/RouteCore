@@ -3,9 +3,15 @@ from app.enums.order_status_enum import OrderStatus
 from app.enums.user_role_enum import UserRole
 
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Enum as SQLEnum
 
 from datetime import datetime
+
+OrderStatusEnum = SQLEnum(
+    OrderStatus,
+    name='orderstatus',
+    values_callable=lambda x: [e.value for e in x]
+)
 
 class User(Base):
     __tablename__ = 'user'
@@ -33,4 +39,13 @@ class Order(Base):
     pickup_address: Mapped[str]
     delivery_address: Mapped[str]
     description: Mapped[str | None] = mapped_column(default=None)
-    status: Mapped[OrderStatus] = mapped_column(default=OrderStatus.PENDING)
+    status: Mapped[OrderStatus] = mapped_column(OrderStatusEnum, default=OrderStatus.PENDING)
+
+class OrderStatusHistory(Base):
+    __tablename__ = 'order_status_history'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    order_id: Mapped[int] = mapped_column(ForeignKey('order.id'))
+    old_status: Mapped[OrderStatus] = mapped_column(OrderStatusEnum)
+    new_status: Mapped[OrderStatus] = mapped_column(OrderStatusEnum)
+    changed_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now())
