@@ -26,9 +26,9 @@ def show_available_orders(db: Session) -> list[Order]:
 def get_order_by_id(db: Session, order_id: int) -> Order | None:
     return db.query(Order).filter(Order.id==order_id).first()
 
-def accept_order(db: Session, courier_id: int, order: Order) -> Order:
+def accept_order(db: Session, courier: Courier, order: Order) -> Order:
     old_order_status = order.status
-    order.status, order.courier_id = OrderStatus.ACCEPTED, courier_id
+    order.status, order.courier_id, courier.is_available = OrderStatus.ACCEPTED, courier.id, False
 
     logging_change_status(db, order.id, old_order_status, order.status)
 

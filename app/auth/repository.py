@@ -16,3 +16,6 @@ def create_user(db: Session, login, email, password_hash) -> User:
 
 def get_user_by_login(db: Session, login) -> User | None:
     return db.query(User).filter(User.login==login).scalar()
+
+def get_user_by_email(db: Session, email) -> User | None:
+    return db.query(User).filter(User.email==email)

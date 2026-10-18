@@ -14,6 +14,12 @@ def create_user(db: Session, login, email, password) -> User:
             status_code=400,
             detail=f'User with login {login} already exists'
         )
+
+    if auth_repository.get_user_by_email(db, email):
+        raise HTTPException(
+            status_code=400,
+            detail=f'User with email {email} already exists'
+        )
     
     password_hash = auth_security.hash_the_password(password)
     new_user = auth_repository.create_user(db, login, email, password_hash)

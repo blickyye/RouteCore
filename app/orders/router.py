@@ -18,7 +18,7 @@ def create_order(order: CreateOrder, db: Session = Depends(get_db), current_user
 
 @router.post('/courier/{order_id}/accept')
 def accept_order(order_id: int, db: Session = Depends(get_db), current_courier: Courier = Depends(get_current_courier)):
-    return orders_service.accept_order(db, current_courier.id, order_id)
+    return orders_service.accept_order(db, current_courier, order_id)
 
 @router.get('/my')
 def show_my_orders(db: Session = Depends(get_db), current_user: User = Depends(get_current_client)):

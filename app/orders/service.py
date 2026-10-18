@@ -22,7 +22,7 @@ def show_available_orders(db: Session) -> list[Order]:
 
     return orders
 
-def accept_order(db: Session, courier_id: int, order_id: int) -> Order:
+def accept_order(db: Session, current_courier: Courier, order_id: int) -> Order:
     order = orders_repository.get_order_by_id(db, order_id)
     if not order:
         raise HTTPException(
@@ -36,7 +36,7 @@ def accept_order(db: Session, courier_id: int, order_id: int) -> Order:
             detail='Order with this id already in delivery'
         )
 
-    accepted_order = orders_repository.accept_order(db, courier_id, order)
+    accepted_order = orders_repository.accept_order(db, current_courier, order)
 
     db.commit()
     db.refresh(accepted_order)
@@ -55,7 +55,7 @@ def change_order_status(db: Session, current_courier: Courier, order_id: int, ne
             detail='Order with this id not found'
         )
     
-    if order.courier_id != current_courier:
+    if order.courier_id != current_courier.id:
         raise HTTPException(
             status_code=403, 
             detail='You are not assigned to this order'
@@ -66,6 +66,12 @@ def change_order_status(db: Session, current_courier: Courier, order_id: int, ne
         OrderStatus.IN_DELIVERY: OrderStatus.DELIVERED
     }
 
+    if order.status not in ALLOWED_TRANSACTIONS:
+        raise HTTPException(
+            status_code=400, 
+            detail=f'Cannot change status from {order.status}'
+        )
+    
     if ALLOWED_TRANSACTIONS[order.status] != new_status:
         raise HTTPException(
             status_code=400,
