@@ -1,9 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-DATABASE_URL = 'postgresql+psycopg://postgres:glebik228900@localhost:5432/routecore'
+from app.config import settings
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(settings.DATABASE_URL)
 
 LocalSession = sessionmaker(autoflush=False, autocommit=False, bind=engine)
 

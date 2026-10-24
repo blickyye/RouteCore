@@ -1,8 +1,10 @@
 from authx import AuthX, AuthXConfig
 
+from app.config import settings
+
 config = AuthXConfig()
 
-config.JWT_SECRET_KEY = 'super-secret-key-that-is-at-least-32-bytes-long-for-security'
+config.JWT_SECRET_KEY = settings.SECRET_KEY
 config.JWT_TOKEN_LOCATION = ['headers']
 
 security = AuthX(config=config)
