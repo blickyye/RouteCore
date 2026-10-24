@@ -10,7 +10,7 @@ app = FastAPI()
 
 app.include_router(auth_router, prefix='/app/auth', tags=['Create user'])
 app.include_router(couriers_router, prefix='/app/couriers', tags=['Couriers'])
-app.include_router(orders_router, prefix='/orders', tags=['Orders'])
+app.include_router(orders_router, prefix='/app/orders', tags=['Orders'])
 
 Base.metadata.create_all(bind=engine)
 

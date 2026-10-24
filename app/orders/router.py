@@ -36,6 +36,6 @@ def show_accepted_by_me_orders(db: Session = Depends(get_db), current_courier: C
 def change_order_status(order_id: int, change_data: StatusChange, db: Session = Depends(get_db), current_courier: Courier = Depends(get_current_courier)):
     return orders_service.change_order_status(db, current_courier, order_id, change_data.new_status)
 
-@router.patch('/orders/{order_id}/cancel')
+@router.patch('/{order_id}/cancel')
 def cancel_order(order_id: int, db: Session = Depends(get_db), current_client: User = Depends(get_current_client)):
     return orders_service.cancel_order(db, current_client.id, order_id)
