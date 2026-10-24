@@ -1,4 +1,5 @@
 from app.test.test_db import client
+from app.enums.order_status_enum import OrderStatus
 
 def get_auth_token(client, login, email):
     registration_response = client.post('/app/auth/registration', json={'login': login, 'email': email, 'password': 's'})
@@ -84,8 +85,75 @@ def test_accept_someone_order(client):
     order_id = create_order_response.json()['id']
     
     accept_order_response = client.post(f'/app/orders/courier/{order_id}/accept', headers={'Authorization': f'Bearer {courier_accepter_token}'})
-    assert create_order_response.status_code == 200
+    assert accept_order_response.status_code == 200
 
     accept_order_by_someone_response = client.post(f'/app/orders/courier/{order_id}/accept', headers={'Authorization': f'Bearer {someone_courier_token}'})
 
     assert accept_order_by_someone_response.status_code == 401
+
+def test_cancel_my_order(client):
+    client_token = get_auth_token(client, 's', 's')
+
+    create_order_response = client.post('/app/orders/', json={'pickup_address': 's', 'delivery_address': 's', 'description': 's'},
+                                        headers={'Authorization': f'Bearer {client_token}'})
+    assert create_order_response.status_code == 200
+
+    order_id = create_order_response.json()['id']
+
+    cancel_order_response = client.patch(f'/app/orders/{order_id}/cancel', headers={'Authorization': f'Bearer {client_token}'})
+
+    assert cancel_order_response.status_code == 200
+
+def test_accept_order_404(client):
+    courier_token = get_auth_courier_token(client, 's', 's')
+
+    accept_order_response = client.post('/app/orders/courier/1/accept', headers={'Authorization': f'Bearer {courier_token}'})
+
+    assert accept_order_response.status_code == 404
+
+def test_cancel_order_404(client):
+    client_token = get_auth_token(client, 's', 's')
+
+    cancel_order_response = client.patch('/app/orders/1/cancel', headers={'Authorization': f'Bearer {client_token}'})
+
+    assert cancel_order_response.status_code == 404
+
+def test_change_someone_order_status(client):
+    client_token = get_auth_token(client, 's', 's')
+    courier_accept_token = get_auth_courier_token(client, 'b', 'b')
+    courier_change_token = get_auth_courier_token(client, 'v', 'v')
+
+    create_order_response = client.post('/app/orders/', json={'pickup_address': 's', 'delivery_address': 's', 'description': 's'},
+                                            headers={'Authorization': f'Bearer {client_token}'})
+    assert create_order_response.status_code == 200
+
+    order_id = create_order_response.json()['id']
+
+    accept_order_response = client.post(f'/app/orders/courier/{order_id}/accept', headers={'Authorization': f'Bearer {courier_accept_token}'})
+    assert accept_order_response.status_code == 200
+
+    change_order_status_response = client.patch(f'/app/orders/courier/{order_id}/status', json={'new_status': 'accepted'},
+                                                headers={'Authorization': f'Bearer {courier_change_token}'})
+
+    assert change_order_status_response.status_code == 403
+
+def test_order_status_transitions(client):
+    client_token = get_auth_token(client, 's', 's')
+    courier_token = get_auth_courier_token(client, 'v', 'v')
+
+    create_order_response = client.post('/app/orders/', json={'pickup_address': 's', 'delivery_address': 's', 'description': 's'},
+                                            headers={'Authorization': f'Bearer {client_token}'})
+    assert create_order_response.status_code == 200
+
+    order_id = create_order_response.json()['id']
+
+    accept_order_response = client.post(f'/app/orders/courier/{order_id}/accept', headers={'Authorization': f'Bearer {courier_token}'})
+    assert accept_order_response.status_code == 200
+
+    change_status_delivery_response = client.patch(f'/app/orders/courier/{order_id}/status', json={'new_status': 'in_delivery'},
+                                                headers={'Authorization': f'Bearer {courier_token}'})
+    assert change_status_delivery_response.status_code == 200
+
+    change_status_delivered_response = client.patch(f'/app/orders/courier/{order_id}/status', json={'new_status': 'delivered'},
+                                                headers={'Authorization': f'Bearer {courier_token}'})
+    assert change_status_delivered_response.status_code == 200
