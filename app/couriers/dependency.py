@@ -19,3 +19,12 @@ def get_current_courier(db: Session = Depends(get_db), payload: TokenPayload = D
         )
 
     return courier
+
+def get_available_courier(current_courier: Courier = Depends(get_current_courier)) -> Courier:
+    if current_courier.is_available is False:
+        raise HTTPException(
+            status_code=401,
+            detail='Courier is not available'
+        )
+    
+    return current_courier
