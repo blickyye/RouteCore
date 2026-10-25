@@ -4,10 +4,15 @@
   "app/test/test_api.py::test_accept_someone_order",
   "app/test/test_api.py::test_cancel_my_order",
   "app/test/test_api.py::test_cancel_order_404",
+  "app/test/test_api.py::test_cancel_order_after_accept",
   "app/test/test_api.py::test_cancel_someone_order",
   "app/test/test_api.py::test_change_someone_order_status",
   "app/test/test_api.py::test_create_order_200",
   "app/test/test_api.py::test_create_order_422",
   "app/test/test_api.py::test_create_orders",
-  "app/test/test_api.py::test_order_status_transitions"
+  "app/test/test_api.py::test_order_status_transitions",
+  "app/test/test_api.py::test_registration_with_exists_email",
+  "app/test/test_api.py::test_takes_courier_actions_from_client",
+  "app/test/test_api.py::test_test_cancel_someone_order",
+  "app/test/test_api.py::test_unauthorized_get_me"
 ]

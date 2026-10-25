@@ -157,3 +157,67 @@ def test_order_status_transitions(client):
     change_status_delivered_response = client.patch(f'/app/orders/courier/{order_id}/status', json={'new_status': 'delivered'},
                                                 headers={'Authorization': f'Bearer {courier_token}'})
     assert change_status_delivered_response.status_code == 200
+
+def test_registration_with_exists_email(client):
+    first_client_reg_response = client.post('/app/auth/registration',
+                                            json={'login': 'first_client', 'email': 'test@gmail.com', 'password': 'test_pass'})
+    assert first_client_reg_response.status_code == 200
+
+    second_client_reg_response = client.post('/app/auth/registration',
+                                                json={'login': 'second_client', 'email': 'test@gmail.com', 'password': 'second_test_pass'})
+    assert second_client_reg_response.status_code == 400
+
+def test_unauthorized_get_me(client):
+    get_me_response = client.get('/app/auth/me')
+    assert get_me_response.status_code == 401
+
+def test_test_cancel_someone_order(client):
+    first_client_token = get_auth_token(client, 's', 's')
+    second_client_token = get_auth_token(client, 'v', 'v')
+
+    create_order_response = client.post('/app/orders/', json={'pickup_address': 's', 'delivery_address': 's', 'description': 's'},
+                                            headers={'Authorization': f'Bearer {first_client_token}'})
+    assert create_order_response.status_code == 200
+
+    order_id = create_order_response.json()['id']
+
+    cancel_order_by_someone_response = client.patch(f'/app/orders/{order_id}/cancel', headers={'Authorization': f'Bearer {second_client_token}'})
+    assert cancel_order_by_someone_response.status_code == 403
+
+def test_takes_courier_actions_from_client(client):
+    client_token = get_auth_token(client, 's', 's')
+
+    create_order_response = client.post('/app/orders/', json={'pickup_address': 's', 'delivery_address': 's', 'description': 's'},
+                                                headers={'Authorization': f'Bearer {client_token}'})
+    assert create_order_response.status_code == 200
+
+    order_id = create_order_response.json()['id']
+
+    requests = [
+                client.post(f'/app/orders/courier/{order_id}/accept', headers={'Authorization': f'Bearer {client_token}'}),
+                client.get('/app/orders/courier/available', headers={'Authorization': f'Bearer {client_token}'}),
+                client.get('/app/orders/courier/my', headers={'Authorization': f'Bearer {client_token}'}),
+                client.patch(f'/app/orders/courier/{order_id}/status', 
+                            json={'new_status': 'accepted'}, headers={'Authorization': f'Bearer {client_token}'})
+                ]       
+
+    for request in requests:
+        assert request.status_code == 403
+
+def test_cancel_order_after_accept(client):
+    client_token = get_auth_token(client, 's', 's')
+    courier_token = get_auth_courier_token(client, 'v', 'v')
+
+    create_order_response = client.post('/app/orders/', json={'pickup_address': 's', 'delivery_address': 's', 'description': 's'},
+                                                    headers={'Authorization': f'Bearer {client_token}'})
+    assert create_order_response.status_code == 200
+
+    order_id = create_order_response.json()['id']
+
+    accept_order_response = client.post(f'/app/orders/courier/{order_id}/accept',
+                                        headers={'Authorization': f'Bearer {courier_token}'})
+    assert accept_order_response.status_code == 200
+
+    try_to_cancel_order_response = client.patch(f'/app/orders/{order_id}/cancel', headers={'Authorization': f'Bearer {client_token}'})
+    assert try_to_cancel_order_response.status_code == 400
+    

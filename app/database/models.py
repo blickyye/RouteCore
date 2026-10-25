@@ -2,7 +2,7 @@ from app.database.database import Base
 from app.enums.order_status_enum import OrderStatus
 from app.enums.user_role_enum import UserRole
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey, Enum as SQLEnum
 
 from datetime import datetime
@@ -23,12 +23,18 @@ class User(Base):
     hashed_password: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now())
 
+    courier: Mapped['Courier | None'] = relationship('Courier', back_populates='user')
+    orders: Mapped[list['Order'] | None] = relationship('Order', back_populates='user')
+
 class Courier(Base):
     __tablename__ = 'courier'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('user.id'), unique=True)
     is_available: Mapped[bool] = mapped_column(default=True)
+
+    user: Mapped['User'] = relationship('User', back_populates='courier')
+    taked_orders: Mapped[list['Order'] | None] = relationship('Order', back_populates='courier')
 
 class Order(Base):
     __tablename__ = 'order'
@@ -40,6 +46,10 @@ class Order(Base):
     delivery_address: Mapped[str]
     description: Mapped[str | None] = mapped_column(default=None)
     status: Mapped[OrderStatus] = mapped_column(OrderStatusEnum, default=OrderStatus.PENDING)
+
+    user: Mapped['User'] = relationship('User', back_populates='orders')
+    courier: Mapped['Courier'] = relationship('Courier', back_populates='taked_orders')
+
 
 class OrderStatusHistory(Base):
     __tablename__ = 'order_status_history'
