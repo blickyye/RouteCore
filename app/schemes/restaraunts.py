@@ -5,7 +5,7 @@ class RestarauntResponse(BaseModel):
 
     id: int
     name: str
-    description: str
+    description: str | None
     address: str
     image_url: str | None
     is_active: bool

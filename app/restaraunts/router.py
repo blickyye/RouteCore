@@ -17,6 +17,6 @@ def show_list_of_restaraunts(db: Session = Depends(get_db)):
 def show_restaraunt(restaraunt_id: int, db: Session = Depends(get_db)):
     return db.query(Restaraunt).filter(Restaraunt.id==restaraunt_id).first()
 
-@router.get('/{restaraunt_id}/menu', response_model=MenuItemResponse)
+@router.get('/{restaraunt_id}/menu', response_model=list[MenuItemResponse])
 def show_restaraunt_menu(restaraunt_id: int, db: Session = Depends(get_db)):
     return rest_service.show_restaraunt_menu(db, restaraunt_id)

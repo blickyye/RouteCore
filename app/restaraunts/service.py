@@ -11,7 +11,7 @@ def check_exists_restaraunt(db: Session, rest_id: int) -> Restaraunt:
     if not restaraunt:
         raise HTTPException(
             status_code=404,
-            detail=f'Restaraunt with id {rest_id} does not exists'
+            detail=f'Restaraunt with id {rest_id} does not exists or restaraunt is not active'
         )
 
     return restaraunt
