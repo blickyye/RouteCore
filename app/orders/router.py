@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.post('/')
 def create_order(order: CreateOrder, db: Session = Depends(get_db), current_user: User = Depends(get_current_client)):
-    return orders_service.create_order(db, current_user.id, order.pickup_address, order.delivery_address, order.description)
+    return orders_service.create_order(db, current_user.id, order.restaraunt_id, order.items)
 
 @router.post('/courier/{order_id}/accept')
 def accept_order(order_id: int, db: Session = Depends(get_db), current_courier: Courier = Depends(get_available_courier)):

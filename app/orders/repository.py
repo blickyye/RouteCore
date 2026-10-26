@@ -1,15 +1,15 @@
 from sqlalchemy.orm import Session
 
-from app.database.models import Order, Courier, OrderStatusHistory
+from app.database.models import Order, Courier, OrderStatusHistory, MenuItem, OrderItem
 from app.enums.order_status_enum import OrderStatus
+from app.schemes.orders import OrderItemCreate
 
-def create_order(db: Session, user_id: int, pick_address: str, deliv_address: str, description: str | None) -> Order:
+def create_order(db: Session, user_id: int, restaraunt_id: int, items: list[OrderItem]) -> Order:
 
     order = Order(
         user_id=user_id,
-        pickup_address=pick_address,
-        delivery_address=deliv_address,
-        description=description
+        restaraunt_id=restaraunt_id,
+        items=items
     )
 
     db.add(order)
@@ -65,3 +65,17 @@ def logging_change_status(db: Session, order_id: int, old_status: OrderStatus, n
 
     db.add(log)
     db.flush()
+
+def parsing_item_to_order_item(db: Session, item: OrderItemCreate, rest_id: int):
+    item_model = check_menu_item_exists(db, item.menu_item_id, rest_id)
+
+    order_item = OrderItem(
+        menu_item_id=item.menu_item_id,
+        quantity=item.quantity,
+        curr_price=item_model.price
+    )
+
+    return order_item
+
+def check_menu_item_exists(db: Session, item_id: int, restaraunt_id: int) -> MenuItem | None:
+    return db.query(MenuItem).filter(MenuItem.id==item_id, MenuItem.restaraunt_id==restaraunt_id).first()

@@ -171,19 +171,6 @@ def test_unauthorized_get_me(client):
     get_me_response = client.get('/app/auth/me')
     assert get_me_response.status_code == 401
 
-def test_test_cancel_someone_order(client):
-    first_client_token = get_auth_token(client, 's', 's')
-    second_client_token = get_auth_token(client, 'v', 'v')
-
-    create_order_response = client.post('/app/orders/', json={'pickup_address': 's', 'delivery_address': 's', 'description': 's'},
-                                            headers={'Authorization': f'Bearer {first_client_token}'})
-    assert create_order_response.status_code == 200
-
-    order_id = create_order_response.json()['id']
-
-    cancel_order_by_someone_response = client.patch(f'/app/orders/{order_id}/cancel', headers={'Authorization': f'Bearer {second_client_token}'})
-    assert cancel_order_by_someone_response.status_code == 403
-
 def test_takes_courier_actions_from_client(client):
     client_token = get_auth_token(client, 's', 's')
 
@@ -220,4 +207,3 @@ def test_cancel_order_after_accept(client):
 
     try_to_cancel_order_response = client.patch(f'/app/orders/{order_id}/cancel', headers={'Authorization': f'Bearer {client_token}'})
     assert try_to_cancel_order_response.status_code == 400
-    

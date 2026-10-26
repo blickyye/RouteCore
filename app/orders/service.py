@@ -3,11 +3,24 @@ from sqlalchemy.orm import Session
 from app.database.models import Order, Courier
 from app.orders import repository as orders_repository
 from app.enums.order_status_enum import OrderStatus
+from app.schemes.orders import OrderItemCreate
+from app.restaraunts import service as restaraunt_service
 
 from fastapi import HTTPException
 
-def create_order(db: Session, user_id: int, pick_address: str, deliv_address: str, description: str | None) -> Order:
-    order = orders_repository.create_order(db, user_id, pick_address, deliv_address, description)
+def create_order(db: Session, user_id: int, rest_id: int, items: list[OrderItemCreate]) -> Order:
+    restaraunt = restaraunt_service.check_exists_restaraunt(db, rest_id)
+
+    for item in items:
+        if orders_repository.check_menu_item_exists(db, item.menu_item_id, rest_id) is None:
+            raise HTTPException(
+                status_code=403, 
+                detail='You choose uncorrect item or item not from this restaraunt'
+            )
+
+    items_list_of_order_item = [orders_repository.parsing_item_to_order_item(db, item, rest_id) for item in items]
+    
+    order = orders_repository.create_order(db, user_id, rest_id, items_list_of_order_item)
 
     db.commit()
     db.refresh(order)
